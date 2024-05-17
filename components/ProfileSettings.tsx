@@ -26,6 +26,7 @@ interface EditModeState {
 }
 
 const ProfileSettings = ({ profile }: { profile: ProfileProps }) => {
+  const [profileData, setProfileData] = useState<ProfileProps>(profile);
   const [editMode, setEditMode] = useState<EditModeState>({
     name: false,
     email: false,
@@ -40,53 +41,83 @@ const ProfileSettings = ({ profile }: { profile: ProfileProps }) => {
     setEditMode((prevState) => ({ ...prevState, [field]: !prevState[field] }));
   };
 
+  const handleInputChange = (field: keyof ProfileProps, value: string) => {
+    setProfileData((prevState) => ({ ...prevState, [field]: value }));
+  };
+
+  const handleSave = () => {
+    // Perform save operation here (e.g., API call to save profile data)
+    console.log("Profile data saved:", profileData);
+    // Exit edit mode after saving
+    setEditMode({
+      name: false,
+      email: false,
+      password: false,
+      phone: false,
+      address: false,
+      dob: false,
+      photo: false,
+    });
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-4">
       <h1 className="text-center text-3xl font-bold mb-6">Profile Settings</h1>
 
       <Tabs disabledKeys={["music"]} aria-label="Disabled Options">
         <Tab key="profileDetail" title="Profile Detail">
-          <div className="bg-white shadow-md rounded-lg p-6 ">
+          <div className="bg-white shadow-md rounded-lg p-6">
             <div className="flex items-center space-x-4 mb-6 justify-center flex-col">
               <img
                 className="w-16 h-16 rounded-full"
-                src={`${profile.photo}`}
-                alt={profile.name}
+                src={`${profileData.photo}`}
+                alt={profileData.name}
               />
               <div>
-                <h2 className="text-2xl font-bold">{profile.name}</h2>
-                <p className="text-gray-600">{profile.email}</p>
+                <h2 className="text-2xl font-bold">{profileData.name}</h2>
+                <p className="text-gray-600">{profileData.email}</p>
               </div>
             </div>
             <div className="space-y-4">
-              {Object.keys(profile).map((key) => (
+              {Object.keys(profileData).map((key) => (
                 <div key={key} className="flex items-center space-x-4">
                   <label className="w-32 font-semibold capitalize">{key}</label>
                   {editMode[key as keyof ProfileProps] ? (
                     <Input
                       fullWidth
-                      initialValue={profile[key as keyof ProfileProps]}
-                      onBlur={() => toggleEditMode(key as keyof EditModeState)}
+                      initialValue={profileData[key as keyof ProfileProps]}
+                      onBlur={(e) =>
+                        handleInputChange(
+                          key as keyof ProfileProps,
+                          e.target.value
+                        )
+                      }
                     />
                   ) : (
                     <p className="flex-1">
-                      {profile[key as keyof ProfileProps]}
+                      {profileData[key as keyof ProfileProps]}
                     </p>
                   )}
                   <Button
+                    className=" text-indigo-500	 border-1 bg-transparent border-indigo-500/100 backgrou"
                     auto
                     onClick={() => toggleEditMode(key as keyof EditModeState)}
                   >
-                    <FontAwesomeIcon icon={faEdit} />
+                    <FontAwesomeIcon icon={faEdit} /> edit
                   </Button>
                 </div>
               ))}
             </div>
             <div className="flex justify-end space-x-2 mt-4">
-              <Button auto flat>
+              <Button
+                className="bg-indigo-200"
+                auto
+                flat
+                onClick={() => setProfileData(profile)}
+              >
                 <FontAwesomeIcon icon={faTimes} /> Cancel
               </Button>
-              <Button auto>
+              <Button className="bg-indigo-500" auto onClick={handleSave}>
                 <FontAwesomeIcon icon={faSave} />
                 Save
               </Button>
